@@ -1,0 +1,11 @@
+streamlit
+pandas
+numpy
+scikit-learn
+spacy
+pdfminer.six
+python-docx
+plotly
+lime
+openai
+langchain
