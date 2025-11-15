@@ -1,6 +1,6 @@
 import spacy
 import re
-from io import StringIO
+from io import StringIO, BytesIO
 from pdfminer.high_level import extract_text_to_fp
 from docx import Document
 from lime.lime_tabular import LimeTabularExplainer
@@ -35,11 +35,10 @@ def extract_text(uploaded_file):
     file_stream = uploaded_file.read()
     
     if file_extension == 'pdf':
-        # For PDF, we need a file-like object, so we use StringIO
-        return extract_text_from_pdf(StringIO(file_stream.decode('latin-1', errors='ignore')))
+        # For PDF, we need a BytesIO object with the raw bytes
+        return extract_text_from_pdf(BytesIO(file_stream))
     elif file_extension == 'docx':
-        # For DOCX, we need a file-like object, so we use BytesIO
-        from io import BytesIO
+        # For DOCX, we need a BytesIO object
         return extract_text_from_docx(BytesIO(file_stream))
     else:
         return "Unsupported file type."
@@ -166,13 +165,13 @@ def detect_bias(candidates_df):
     """
     Mocks a simple bias detection by comparing average scores across a mock demographic feature.
     
-    :param candidates_df: DataFrame of candidates with 'match_score' and 'demographic_mock' columns.
+    :param candidates_df: DataFrame of candidates with 'Match Score' and 'Demographic Mock' columns.
     :return: Dictionary of average scores per group.
     """
-    if candidates_df.empty or 'demographic_mock' not in candidates_df.columns:
-        return {"Error": "No data or 'demographic_mock' column missing."}
+    if candidates_df.empty or 'Demographic Mock' not in candidates_df.columns:
+        return {"Error": "No data or 'Demographic Mock' column missing."}
         
-    avg_scores = candidates_df.groupby('demographic_mock')['match_score'].mean().to_dict()
+    avg_scores = candidates_df.groupby('Demographic Mock')['Match Score'].mean().to_dict()
     
     # Simple check for score disparity
     if len(avg_scores) >= 2:

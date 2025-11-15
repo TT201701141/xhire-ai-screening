@@ -218,7 +218,7 @@ with tab3:
             # Call the OpenAI API
             try:
                 stream = client.chat.completions.create(
-                    model='gemini-2.5-flash',
+                    model='gpt-3.5-turbo',
                     messages=[
                         {'role': 'system', 'content': 'You are a helpful HR assistant. Use the following data to answer questions about the candidates. The data is in a pandas DataFrame string format.'},
                         {'role': 'user', 'content': f'Here is the candidate data:\n{context}'},
