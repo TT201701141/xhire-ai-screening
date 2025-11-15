@@ -1,6 +1,6 @@
 import spacy
 import re
-from io import StringIO
+from io import StringIO, BytesIO
 from pdfminer.high_level import extract_text_to_fp
 from docx import Document
 from lime.lime_tabular import LimeTabularExplainer
@@ -30,16 +30,15 @@ def extract_text_from_docx(file_stream):
 def extract_text(uploaded_file):
     """Routes file to the correct text extraction function."""
     file_extension = uploaded_file.name.split('.')[-1].lower()
-    
+
     # Read the file content once
     file_stream = uploaded_file.read()
-    
+
     if file_extension == 'pdf':
-        # For PDF, we need a file-like object, so we use StringIO
-        return extract_text_from_pdf(StringIO(file_stream.decode('latin-1', errors='ignore')))
+        # For PDF, we need a binary file-like object (BytesIO)
+        return extract_text_from_pdf(BytesIO(file_stream))
     elif file_extension == 'docx':
         # For DOCX, we need a file-like object, so we use BytesIO
-        from io import BytesIO
         return extract_text_from_docx(BytesIO(file_stream))
     else:
         return "Unsupported file type."
@@ -59,15 +58,16 @@ def extract_skills(text):
     In a real-world scenario, this would be a more sophisticated NER model.
     """
     if not nlp:
-        return []
-        
+        import streamlit as st
+        st.warning("⚠️ SpaCy model 'en_core_web_sm' not found. Skill extraction may be limited. Please run: python -m spacy download en_core_web_sm")
+
     found_skills = set()
     text_lower = text.lower()
-    
+
     for skill in MOCK_SKILLS:
         if skill.lower() in text_lower:
             found_skills.add(skill)
-            
+
     return list(found_skills)
 
 # --- 3. Candidate Scoring ---
@@ -165,14 +165,14 @@ def explain_score_lime(extracted_skills, job_profile):
 def detect_bias(candidates_df):
     """
     Mocks a simple bias detection by comparing average scores across a mock demographic feature.
-    
-    :param candidates_df: DataFrame of candidates with 'match_score' and 'demographic_mock' columns.
+
+    :param candidates_df: DataFrame of candidates with 'Match Score' and 'Demographic Mock' columns.
     :return: Dictionary of average scores per group.
     """
-    if candidates_df.empty or 'demographic_mock' not in candidates_df.columns:
-        return {"Error": "No data or 'demographic_mock' column missing."}
-        
-    avg_scores = candidates_df.groupby('demographic_mock')['match_score'].mean().to_dict()
+    if candidates_df.empty or 'Demographic Mock' not in candidates_df.columns:
+        return {"Error": "No data or 'Demographic Mock' column missing."}
+
+    avg_scores = candidates_df.groupby('Demographic Mock')['Match Score'].mean().to_dict()
     
     # Simple check for score disparity
     if len(avg_scores) >= 2:
